@@ -1,0 +1,9 @@
+<svg version="1.2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30" width="30" height="30">
+	<title>github-icon</title>
+	<defs>
+		<image  width="24" height="24" id="img1" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAMAAADXqc3KAAAAAXNSR0IB2cksfwAAAURQTFRFAAAAZ1d4fGiQmoGzrZHJvp/dmYGyfGiQZ1Z3all7j3ilwqPix6fnwqPhjXajaVh6d2SLv6HedWKIgW2WfWmRd2SKxabldGGGa1l8cF6BcF6CiHKexqbmmH+wcl+EvZ7baFd5ln6uZFR0d2OKbVt+ZVV2bVx/eGWLZVV1bFt+aVh6xKTjg26Zb12Be2ePooi8ln6ulX2tsZXOcV+DcmCFp43Cv6DdZ1Z3upzYall7Z1d4sJPMdmOJspXPmoGyrpLKZlV2q5DHm4K0gWyWoIa5bVt+ooi8gGyVxaXkmYCxfWmRaVh6a1p8hG+ZnYS2aFh5kXmoe2ePnYO2dmOJc2GGknqpuZvWZlZ3lHysinSgjHWiu53ZaFd5blx/e2eOuJrVc2GGZVR1ZFR0gGuUcl+EvJ7acV+DkHmnvZ/chnGch3GdZlZ2sdFIqQAAAGx0Uk5TACOj6vn+6KEhONf////TNY7/gbWmi/96P2JnyP/nbv4q4wKKTxJUkA5LMf+8XZ3x5OL7a3P2/x/+OiX6iPvp+hb46rPvUPKx/+ikM0O+7S7bnuyHed39G+HN0f4sVZz9dwwEsHD+bdn+xMYXyDrwdAAAAW1JREFUeJxdkt0rw2EUx7/f5T3ylrcirC2moaF5mdxIMxHJleJCLvxDbpTckCIpUUJyIZLIS2ZZ1rzcLJqZt2lqnuf322/7cS7Oc8738zzn/H7neQjVKA0xAxmJC4rPlGpix2sC5EU1WVoqg3FQ+I2/lvGsgKKvfzqyGBCg9CMG5JDRT6Uq+RNGIf1E9ZPIi30oyJcfFgqg9hEwhGl5kBt/IslCdfdApZtWv0yqL5Og7E04IxtvxWI60/eueAHMbLoRYc2JHrR4AAvtbnnaqwetV4BVBfWHetBxIX/fcS7Ckls96BQdbew6FWEz95K6ufwYsLP7SCZt3NZ0k/FAeAdz2/eVUdSTG0A/uaukzcTQDnq4BcR6V4CR6zvlmGuZqPOm95HrGFiUyuia9IOcF2Nv8CElpHUYW5U+Lahc1Pimi5xTwcSSaOCcjV/tJEWZd5Vkw2aZgfYYqpwLGpjijjIf7RWUDu965Gp0TavCLyImVgw7LO/EAAAAAElFTkSuQmCC"/>
+	</defs>
+	<style>
+	</style>
+	<use  href="#img1" x="3" y="3"/>
+</svg>
