@@ -1,0 +1,310 @@
+:root {
+  --bg: #191724;
+  --text: #e0def4;
+  --muted: #6e6a86;
+  --highlight: #ebbcba;
+  --rose: #f6c177;
+  --pine: #907aa9;
+  --iris: #c4a7e7;
+  --rose-moon: #ebbcba;
+}
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+}
+body {
+  width: 300px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 12px;
+  padding: 8px;
+  overflow-y: auto;
+  height: auto;
+}
+.blur-container {
+  position: relative;
+}
+.blur-container.blur-active > .container {
+  filter: blur(4px);
+  pointer-events: none;
+}
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+h2 {
+  font-size: 16px;
+  color: var(--iris);
+  margin-bottom: 6px;
+}
+.set-reminder {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 4px;
+}
+.set-reminder input,
+.set-reminder textarea {
+  width: 100%;
+  padding: 4px 6px;
+  margin: 2px 0;
+  font-size: 12px;
+  background: #26233a;
+  border: 1px solid var(--muted);
+  border-radius: 3px;
+  color: var(--text);
+}
+.set-reminder textarea {
+  resize: vertical;
+}
+.set-reminder button {
+  width: 100%;
+  padding: 4px;
+  margin-top: 4px;
+  font-size: 12px;
+  background: var(--iris);
+  color: var(--bg);
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.set-reminder button:hover {
+  background: var(--pine);
+}
+.tab-headers {
+  display: flex;
+  margin-bottom: 4px;
+}
+.main-tab-header {
+  flex: 1;
+  padding: 6px 8px;
+  background: #26233a;
+  text-align: center;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: background 0.2s, border-bottom-color 0.2s;
+}
+.main-tab-header:hover {
+  background: #2d2a3f;
+}
+.main-tab-header.active {
+  background: #1f1c33;
+  border-bottom-color: var(--iris);
+}
+.url-sub-tabs,
+.note-sub-tabs {
+  display: flex;
+  margin-bottom: 8px;
+}
+.sub-tab-header {
+  flex: 1;
+  padding: 6px 8px;
+  background: #26233a;
+  text-align: center;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: background 0.2s, border-bottom-color 0.2s;
+}
+.sub-tab-header:hover {
+  background: #2d2a3f;
+}
+.sub-tab-header.active {
+  background: #1f1c33;
+  border-bottom-color: var(--iris);
+}
+.sub-tab-header:not(.active):not(:hover) {
+  background: #26233a;
+  border-bottom-color: transparent;
+}
+.url-section {
+  display: flex;
+  flex-direction: column;
+}
+.note-section {
+  display: none;
+}
+#nukeAll {
+  width: 100%;
+  padding: 4px;
+  margin-bottom: 4px;
+  font-size: 12px;
+  background: var(--rose);
+  color: var(--bg);
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+#nukeAll:hover {
+  background: #d64d70;
+}
+.confirmation {
+  min-height: 16px;
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--iris);
+}
+.tab-content {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 400px;
+  min-height: 0;
+}
+.tab-pane {
+  display: none;
+}
+.tab-pane.active {
+  display: block;
+}
+.reminder {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  background: #26233a;
+  border-radius: 3px;
+  padding: 4px;
+  margin: 4px 0;
+}
+.reminder-text {
+  flex: 1 1 auto;
+  font-size: 11px;
+  margin-right: 4px;
+  word-break: break-all;
+  color: var(--iris);
+}
+.reminder-link {
+  flex: 1 1 auto;
+  font-size: 11px;
+  margin-right: 4px;
+  word-break: break-all;
+  color: var(--pine);
+  text-decoration: underline;
+}
+.reminder-time {
+  flex: 0 0 auto;
+  font-size: 11px;
+  margin-right: 4px;
+  color: var(--text);
+}
+.reminder input.editTime {
+  flex: 0 0 auto;
+  font-size: 11px;
+  padding: 2px 4px;
+  margin: 2px 0;
+  background: #191724;
+  border: 1px solid var(--muted);
+  border-radius: 3px;
+  color: var(--text);
+}
+.reminder textarea.editText {
+  flex: 1 1 100%;
+  margin: 4px 0;
+  padding: 2px 4px;
+  background: #1f1c33;
+  border: 1px solid var(--muted);
+  border-radius: 3px;
+  color: var(--text);
+  font-size: 11px;
+  resize: vertical;
+}
+.reminder button {
+  flex: 0 0 auto;
+  padding: 2px 6px;
+  margin-left: 4px;
+  font-size: 11px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.reminder button.update {
+  background: var(--rose);
+  color: #fff;
+}
+.reminder button.update:hover {
+  opacity: 0.8;
+}
+.reminder button.delete {
+  background: var(--highlight);
+  color: var(--bg);
+}
+.reminder button.delete:hover {
+  opacity: 0.8;
+}
+#nukeModal {
+  display: none;
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  background: var(--bg);
+  border: 2px solid var(--iris);
+  border-radius: 6px;
+  padding: 16px;
+  width: 260px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
+}
+#nukeModal h3 {
+  margin-bottom: 8px;
+  color: var(--rose-moon);
+  font-size: 1.1em;
+  text-align: center;
+}
+#nukeModal p {
+  margin-bottom: 16px;
+  font-size: 0.9em;
+  text-align: center;
+  color: var(--text);
+}
+#nukeModal .actions {
+  display: flex;
+  justify-content: space-between;
+}
+#nukeModal .actions button {
+  flex: 1;
+  padding: 6px 0;
+  margin: 0 4px;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  color: #fff;
+  cursor: pointer;
+}
+#nukeModal .actions button.yes {
+  background: #eb6f92;
+}
+#nukeModal .actions button.no {
+  background: #3e8fb0;
+}
+.popup-footer {
+  margin-top: 12px;
+  text-align: center;
+}
+.popup-footer .footer-btn {
+  display: inline-flex;
+  align-items: center;
+  margin: 0 8px;
+  padding: 4px 8px;
+  background: #26233a;
+  color: var(--text);
+  text-decoration: none;
+  border-radius: 3px;
+  font-size: 12px;
+  transition: background 0.2s;
+}
+.popup-footer .footer-btn:hover {
+  background: #2d2a3f;
+}
+.popup-footer .footer-btn img {
+  width: 16px;
+  height: 16px;
+  margin-right: 4px;
+}
+.popup-footer .credit {
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--muted);
+}
