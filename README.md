@@ -13,7 +13,7 @@ Remind Me is an extension I wrote for people to be able to set reminders to them
 
 ## Chromium browsers install guide (because I'm not paying 700₺ to host a hobby project in their shitty store lmaooooo)
 
-#### 1- Open `chrome://extensions` in your browser, and turn the developer mode on
+#### 1- Open `chrome://extensions` in your browser and turn the developer mode on
 <img width="432" height="204" alt="image" src="https://github.com/user-attachments/assets/145311ab-1b4d-42de-8177-7920fe18a122" />
 
 #### 2- Drag the `remindme_crm.crx` file you downloaded into the browser
