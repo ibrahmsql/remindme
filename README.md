@@ -1,6 +1,10 @@
 # remindme
 A browser extension designed to remind you about URL's or Notes in a specified time and date.
 
+<img width="297" height="365" alt="image" src="https://github.com/user-attachments/assets/fd3cc477-1606-4fc8-9717-bfdfead8fd52" /> 
+
+<img width="297" height="332" alt="image" src="https://github.com/user-attachments/assets/84248f80-dc1a-4ecf-b7ff-191144ba0236" />
+
 ## What does that mean?
 Remind Me is an extension I wrote for people to be able to set reminders to themselves. The reminders you set will send a notification to you at the exact time you set them to do! The reminders should be hashed/encrypted and stored locally also.
 
@@ -12,7 +16,7 @@ Remind Me is an extension I wrote for people to be able to set reminders to them
 #### 1- Open `chrome://extensions` in your browser
 <img width="432" height="204" alt="image" src="https://github.com/user-attachments/assets/145311ab-1b4d-42de-8177-7920fe18a122" />
 
-#### 2- Drag the remindme_crm.crx file you downloaded into the browser
+#### 2- Drag the `remindme_crm.crx` file you downloaded into the browser
 <img width="432" height="767" alt="image" src="https://github.com/user-attachments/assets/dc081b59-da85-411c-8971-e3bbaab59289" />
 
 ### 3- Click the Add Extension button
@@ -26,4 +30,3 @@ Remind Me is an extension I wrote for people to be able to set reminders to them
 
 ### Congrats, now you have the extension! Unfortunately you won't be getting automatically syncing updates like Firefox people does due to your shitty browser :c
 <img width="432" height="419" alt="image" src="https://github.com/user-attachments/assets/d09ee58e-117a-42a2-aab7-87e89fa8f636" />
-
