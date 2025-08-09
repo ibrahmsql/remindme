@@ -11,8 +11,8 @@ Remind Me is an extension I wrote for people to be able to set reminders to them
 ## Which one is which though?
 [remindme_Mv2](https://github.com/Pwissh/remindme/tree/main/remindme_Mv2)(short for manifest v2) is the Firefox version while [remindme_Mv3](https://github.com/Pwissh/remindme/tree/main/remindme_Mv3)(short for manifest v3) is the Chromium version.
 
-## Firefox Add-Ons
-<a rel="noreferrer noopener" href="https://addons.mozilla.org/en-US/firefox/addon/remind-me-pls/"><img alt="Firefox Add-ons" src="https://img.shields.io/badge/Firefox-141e24.svg?&style=for-the-badge&logo=firefox-browser&logoColor=white"></a>
+## Firefox Add-ons
+<a rel="noreferrer noopener" href="https://addons.mozilla.org/en-US/firefox/addon/remind-me-pls/"><img alt="Firefox Add-ons" src="https://img.shields.io/badge/Firefox-232136.svg?&style=for-the-badge&logo=firefox-browser&logoColor=c4a7e7"></a>
 
 ## Chromium browsers install guide (because I'm not paying 700₺ to host a hobby project in their shitty store lmaooooo)
 
