@@ -7,21 +7,39 @@ async function sha256Hex(str) {
 }
 
 function getAllReminders() {
-  return chrome.storage.local.get("reminders").then(d => d.reminders || { url: {}, notes: {} });
+  return browser.storage.local.get("reminders").then(d => d.reminders || { url: {}, notes: {} });
 }
 
 function setAllReminders(obj) {
-  return chrome.storage.local.set({ reminders: obj });
+  return browser.storage.local.set({ reminders: obj });
 }
 
-chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+function getNextRepeatTime(currentTime, repeatType) {
+  const date = new Date(currentTime);
+  switch(repeatType) {
+    case 'daily':
+      date.setDate(date.getDate() + 1);
+      break;
+    case 'weekly':
+      date.setDate(date.getDate() + 7);
+      break;
+    case 'monthly':
+      date.setMonth(date.getMonth() + 1);
+      break;
+    default:
+      return null;
+  }
+  return date.getTime();
+}
+
+browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   const { action, url, time, text, hash, type } = msg;
   if (action === "deleteReminder" && hash && type) {
     getAllReminders().then(all => {
       if (all[type]?.[hash]) {
         delete all[type][hash];
         return setAllReminders(all).then(() => {
-          chrome.alarms.clear(hash);
+          browser.alarms.clear(hash);
           sendResponse({ status: "success" });
         });
       }
@@ -33,7 +51,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (action === "nukeAllReminders") {
     getAllReminders().then(all => {
       const keys = [...Object.keys(all.url), ...Object.keys(all.notes)];
-      keys.forEach(k => chrome.alarms.clear(k));
+      keys.forEach(k => browser.alarms.clear(k));
       return setAllReminders({ url: {}, notes: {} });
     }).then(() => sendResponse({ status: "success" }));
     return true;
@@ -57,7 +75,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         originalTime: time
       };
       await setAllReminders(all);
-      chrome.alarms.clear(urlHash, () => chrome.alarms.create(urlHash, { when: time }));
+      browser.alarms.clear(urlHash).then(() => browser.alarms.create(urlHash, { when: time }));
       sendResponse({ status: "success", hash: urlHash });
       return;
     }
@@ -67,7 +85,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   return true;
 });
 
-chrome.alarms.onAlarm.addListener(async alarm => {
+browser.alarms.onAlarm.addListener(async alarm => {
   const urlHash = alarm.name;
   const all = await getAllReminders();
   let entry = null;
@@ -94,57 +112,42 @@ chrome.alarms.onAlarm.addListener(async alarm => {
     message = entry.text;
   }
   
-  chrome.notifications.create(urlHash, {
+  browser.notifications.create(urlHash, {
     type: "basic",
     iconUrl: "icon48.png",
     title,
-    message,
-    priority: 2
+    message
   });
   
-  // Tekrarlayan hatırlatma için yeni alarm oluştur
-  if (entry.repeatType && entry.repeatType !== "none") {
-    const nextTime = calculateNextRepeatTime(entry.ts, entry.repeatType);
-    entry.ts = nextTime;
-    entry.fired = false;
-    chrome.alarms.create(urlHash, { when: nextTime });
+  // Tekrarlayan hatırlatma kontrolü
+  if (entry.repeatType && entry.repeatType !== 'none') {
+    const nextTime = getNextRepeatTime(entry.ts, entry.repeatType);
+    if (nextTime) {
+      entry.ts = nextTime;
+      entry.fired = false;
+      await setAllReminders(all);
+      browser.alarms.create(urlHash, { when: nextTime });
+    }
   } else {
     entry.fired = true;
+    await setAllReminders(all);
   }
-  
-  await setAllReminders(all);
 });
 
-function calculateNextRepeatTime(currentTime, repeatType) {
-  const date = new Date(currentTime);
-  switch (repeatType) {
-    case "daily":
-      date.setDate(date.getDate() + 1);
-      break;
-    case "weekly":
-      date.setDate(date.getDate() + 7);
-      break;
-    case "monthly":
-      date.setMonth(date.getMonth() + 1);
-      break;
-  }
-  return date.getTime();
-}
-
-chrome.notifications.onClicked.addListener(notificationId => {
+browser.notifications.onClicked.addListener(notificationId => {
   getAllReminders().then(all => {
     for (const t of ["url", "notes"]) {
       const e = all[t]?.[notificationId];
       if (e) {
-        if (e.url.startsWith("http")) chrome.tabs.create({ url: e.url });
+        if (e.url.startsWith("http")) browser.tabs.create({ url: e.url });
         break;
       }
     }
-    chrome.notifications.clear(notificationId);
+    browser.notifications.clear(notificationId);
   });
 });
 
-chrome.runtime.onStartup.addListener(async () => {
+browser.runtime.onStartup.addListener(async () => {
   const all = await getAllReminders();
   const now = Date.now();
   let missed = false;
@@ -158,12 +161,11 @@ chrome.runtime.onStartup.addListener(async () => {
   }
   await setAllReminders(all);
   if (missed) {
-    chrome.notifications.create("missedReminders", {
+    browser.notifications.create("missedReminders", {
       type: "basic",
       iconUrl: "icon48.png",
       title: "[remindme]",
-      message: "You missed some reminders while the browser was closed!",
-      priority: 2
+      message: "You missed some reminders while the browser was closed!"
     });
   }
 });

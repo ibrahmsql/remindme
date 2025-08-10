@@ -22,6 +22,48 @@ body {
   padding: 8px;
   overflow-y: auto;
   height: auto;
+  min-width: 280px;
+  max-width: 400px;
+}
+
+/* Mobile compatibility */
+@media (max-width: 480px) {
+  body {
+    width: 100vw;
+    max-width: 100vw;
+    padding: 12px;
+    font-size: 14px;
+  }
+  
+  .set-reminder input,
+  .set-reminder textarea,
+  .set-reminder select {
+    padding: 8px 10px;
+    font-size: 14px;
+    margin: 4px 0;
+  }
+  
+  .set-reminder button {
+    padding: 8px;
+    font-size: 14px;
+    margin-top: 8px;
+  }
+  
+  .main-tab-header,
+  .sub-tab-header {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+  
+  .reminder {
+    padding: 8px;
+    margin: 6px 0;
+  }
+  
+  .reminder button {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
 }
 .blur-container {
   position: relative;
@@ -46,7 +88,8 @@ h2 {
   margin-bottom: 4px;
 }
 .set-reminder input,
-.set-reminder textarea {
+.set-reminder textarea,
+.set-reminder select {
   width: 100%;
   padding: 4px 6px;
   margin: 2px 0;
@@ -54,6 +97,15 @@ h2 {
   background: #26233a;
   border: 1px solid var(--muted);
   border-radius: 3px;
+  color: var(--text);
+}
+
+.set-reminder select {
+  cursor: pointer;
+}
+
+.set-reminder select option {
+  background: #26233a;
   color: var(--text);
 }
 .set-reminder textarea {
@@ -189,7 +241,8 @@ h2 {
   margin-right: 4px;
   color: var(--text);
 }
-.reminder input.editTime {
+.reminder input.editTime,
+.reminder select.editRepeat {
   flex: 0 0 auto;
   font-size: 11px;
   padding: 2px 4px;
@@ -198,6 +251,23 @@ h2 {
   border: 1px solid var(--muted);
   border-radius: 3px;
   color: var(--text);
+}
+
+.reminder select.editRepeat {
+  cursor: pointer;
+  min-width: 80px;
+}
+
+.reminder select.editRepeat option {
+  background: #191724;
+  color: var(--text);
+}
+
+.repeat-info {
+  color: var(--rose);
+  font-size: 10px;
+  font-weight: bold;
+  margin-left: 4px;
 }
 .reminder textarea.editText {
   flex: 1 1 100%;

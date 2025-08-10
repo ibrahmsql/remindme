@@ -1,3 +1,26 @@
+// Firefox compatible API wrapper
+const chromeAPI = {
+  storage: {
+    local: {
+      get: (key) => browser.storage.local.get(key),
+      set: (obj) => browser.storage.local.set(obj)
+    }
+  },
+  runtime: {
+    sendMessage: (msg, callback) => {
+      browser.runtime.sendMessage(msg).then(callback).catch(err => {
+        console.error('Message error:', err);
+        if (callback) callback({ status: 'error', message: err.message });
+      });
+    }
+  }
+};
+
+// Chrome API'sini Firefox için override et
+if (typeof chrome === 'undefined') {
+  window.chrome = chromeAPI;
+}
+
 function normalizeUrl(input) {
   let url = input.trim();
   if (!/^(https?:\/\/)/i.test(url)) {
@@ -36,7 +59,7 @@ function formatDateTime(ms) {
 
 function getSectionStates() {
   return new Promise(r =>
-    chrome.storage.local.get("sectionStates", d =>
+    chrome.storage.local.get("sectionStates").then(d =>
       r(d.sectionStates || { activeTab: "url", subTab: "futureUrl" })
     )
   );
@@ -56,10 +79,23 @@ function showConfirm(msg, isError = false) {
 
 function fetchReminders() {
   return new Promise(r =>
-    chrome.storage.local.get("reminders", d =>
+    chrome.storage.local.get("reminders").then(d =>
       r(d.reminders || { url: {}, notes: {} })
     )
   );
+}
+
+function setAllReminders(obj) {
+  return chrome.storage.local.set({ reminders: obj });
+}
+
+function getRepeatText(repeatType) {
+  switch(repeatType) {
+    case 'daily': return 'Daily';
+    case 'weekly': return 'Weekly';
+    case 'monthly': return 'Monthly';
+    default: return '';
+  }
 }
 
 function makeNode(hash, entry) {
@@ -95,15 +131,6 @@ function makeNode(hash, entry) {
   return div;
 }
 
-function getRepeatText(repeatType) {
-  switch(repeatType) {
-    case 'daily': return 'Daily';
-    case 'weekly': return 'Weekly';
-    case 'monthly': return 'Monthly';
-    default: return '';
-  }
-}
-
 async function loadReminders() {
   const all = await fetchReminders();
   const now = Date.now();
@@ -122,53 +149,50 @@ async function loadReminders() {
       : document.getElementById("pastNoteList");
     container.appendChild(makeNode(h, e));
   });
-  const { activeTab, subTab } = await getSectionStates();
-  activateTab(activeTab, subTab);
 }
 
 async function activateTab(mainTab, subTab = null) {
-  const defaultSub = mainTab === "url" ? "futureUrl" : "futureNote";
-  const current = await getSectionStates();
-  if (current.activeTab !== mainTab) subTab = null;
-  document.querySelectorAll(".main-tab-header").forEach(h =>
-    h.classList.toggle("active", h.dataset.tab === mainTab)
-  );
-  document.querySelectorAll(".sub-tab-header").forEach(h =>
-    h.classList.toggle("active", h.dataset.tab === subTab)
-  );
-  document.querySelector(".url-section").style.display =
-    mainTab === "url" ? "flex" : "none";
-  document.querySelector(".note-section").style.display =
-    mainTab === "notes" ? "flex" : "none";
-  document.querySelector(".url-sub-tabs").style.display =
-    mainTab === "url" ? "flex" : "none";
-  document.querySelector(".note-sub-tabs").style.display =
-    mainTab === "notes" ? "flex" : "none";
-  document.querySelectorAll(".tab-pane").forEach(p =>
-    p.classList.toggle("active", p.id === (subTab + "List"))
-  );
-  saveSectionStates({ activeTab: mainTab, subTab });
+  document.querySelectorAll(".main-tab-header").forEach(h => h.classList.remove("active"));
+  document.querySelector(`[data-tab="${mainTab}"]`).classList.add("active");
+  document.querySelector(".url-section").style.display = mainTab === "url" ? "flex" : "none";
+  document.querySelector(".note-section").style.display = mainTab === "notes" ? "flex" : "none";
+  document.querySelector(".url-sub-tabs").style.display = mainTab === "url" ? "flex" : "none";
+  document.querySelector(".note-sub-tabs").style.display = mainTab === "notes" ? "flex" : "none";
+  
+  const defaultSubTab = subTab || (mainTab === "url" ? "futureUrl" : "futureNote");
+  document.querySelectorAll(".sub-tab-header").forEach(h => h.classList.remove("active"));
+  document.querySelector(`[data-tab="${defaultSubTab}"]`).classList.add("active");
+  document.querySelectorAll(".tab-pane").forEach(p => p.classList.remove("active"));
+  document.getElementById(`${defaultSubTab}List`).classList.add("active");
+  
+  const states = await getSectionStates();
+  states.activeTab = mainTab;
+  states.subTab = defaultSubTab;
+  saveSectionStates(states);
 }
 
 document.getElementById("setUrlReminder").onclick = () => {
-  const rawUrl = document.getElementById("url").value.trim();
-  const txt    = document.getElementById("urlReminderText").value.trim();
-  const when   = fromLocalInput(document.getElementById("urlReminderTime").value);
+  const url = document.getElementById("url").value.trim();
+  const time = document.getElementById("urlReminderTime").value;
+  const text = document.getElementById("urlReminderText").value.trim();
   const repeatType = document.getElementById("urlRepeatType").value;
-  if (!when) {
-    return showConfirm("Enter a valid date/time", true);
+  if (!url) {
+    showConfirm("Please enter a URL", true);
+    return;
   }
-  if (!isLikelyUrl(rawUrl)) {
-    return showConfirm(
-      "Please enter a valid URL (e.g. example.com or https://example.com)",
-      true
-    );
+  if (!time) {
+    showConfirm("Please select a time", true);
+    return;
   }
-  const url = normalizeUrl(rawUrl);
+  const ms = fromLocalInput(time);
+  if (ms <= Date.now()) {
+    showConfirm("Please select a future time", true);
+    return;
+  }
   chrome.runtime.sendMessage(
-    { action: "setReminder", url, time: when, text: txt, type: "url", repeatType },
-    res => {
-      if (res.status === "success") {
+    { action: "setReminder", url, time: ms, text, type: "url", repeatType },
+    r => {
+      if (r.status === "success") {
         showConfirm("URL reminder set!");
         document.getElementById("url").value = "";
         document.getElementById("urlReminderTime").value = "";
@@ -176,32 +200,40 @@ document.getElementById("setUrlReminder").onclick = () => {
         document.getElementById("urlRepeatType").value = "none";
         loadReminders();
       } else {
-        showConfirm(res.message || "Set failed", true);
+        showConfirm(r.message, true);
       }
     }
   );
 };
 
 document.getElementById("setNoteReminder").onclick = () => {
-  const when = fromLocalInput(
-    document.getElementById("noteReminderTime").value
-  );
-  const txt = document.getElementById("noteReminderText").value.trim();
+  const time = document.getElementById("noteReminderTime").value;
+  const text = document.getElementById("noteReminderText").value.trim();
   const repeatType = document.getElementById("noteRepeatType").value;
-  if (!when || !txt) {
-    return showConfirm("Enter time and note", true);
+  if (!text) {
+    showConfirm("Please enter a note", true);
+    return;
+  }
+  if (!time) {
+    showConfirm("Please select a time", true);
+    return;
+  }
+  const ms = fromLocalInput(time);
+  if (ms <= Date.now()) {
+    showConfirm("Please select a future time", true);
+    return;
   }
   chrome.runtime.sendMessage(
-    { action: "setReminder", url: "", time: when, text: txt, type: "notes", repeatType },
-    res => {
-      if (res.status === "success") {
+    { action: "setReminder", time: ms, text, type: "notes", repeatType },
+    r => {
+      if (r.status === "success") {
         showConfirm("Note reminder set!");
         document.getElementById("noteReminderTime").value = "";
         document.getElementById("noteReminderText").value = "";
         document.getElementById("noteRepeatType").value = "none";
         loadReminders();
       } else {
-        showConfirm(res.message || "Set failed", true);
+        showConfirm(r.message, true);
       }
     }
   );
@@ -209,40 +241,41 @@ document.getElementById("setNoteReminder").onclick = () => {
 
 async function onUpdate(e) {
   const hash = e.target.dataset.hash;
-  const parent = e.target.closest(".reminder");
-  const when = fromLocalInput(parent.querySelector(".editTime").value);
-  const txt = parent.querySelector(".editText").value.trim();
-  const repeatType = parent.querySelector(".editRepeat").value;
-  if (!when) {
-    return showConfirm("Pick a date/time", true);
+  const reminder = e.target.closest(".reminder");
+  const newText = reminder.querySelector(".editText").value;
+  const newTimeStr = reminder.querySelector(".editTime").value;
+  const newRepeatType = reminder.querySelector(".editRepeat").value;
+  if (!newTimeStr) {
+    showConfirm("Please enter a valid time", true);
+    return;
   }
+  const newTime = fromLocalInput(newTimeStr);
   const all = await fetchReminders();
-  let entry, type;
-  for (let t of ["url", "notes"]) {
-    if (all[t][hash]) {
-      entry = all[t][hash];
+  let type = null;
+  let entry = null;
+  for (const t of ["url", "notes"]) {
+    if (all[t]?.[hash]) {
       type = t;
+      entry = all[t][hash];
       break;
     }
   }
   if (!entry) {
-    return showConfirm("Entry missing", true);
+    showConfirm("Reminder not found", true);
+    return;
   }
+  entry.text = newText;
+  entry.ts = newTime;
+  entry.repeatType = newRepeatType;
+  await setAllReminders(all);
   chrome.runtime.sendMessage(
-    {
-      action: "updateReminder",
-      url: entry.url,
-      time: when,
-      text: txt,
-      type,
-      repeatType
-    },
-    res => {
-      if (res.status === "success") {
-        showConfirm("Updated!");
+    { action: "updateReminder", hash, url: entry.url, time: newTime, text: newText, type, repeatType: newRepeatType },
+    r => {
+      if (r.status === "success") {
+        showConfirm("Reminder updated!");
         loadReminders();
       } else {
-        showConfirm("Update failed", true);
+        showConfirm(r.message, true);
       }
     }
   );
@@ -251,18 +284,25 @@ async function onUpdate(e) {
 async function onDelete(e) {
   const hash = e.target.dataset.hash;
   const all = await fetchReminders();
-  const type = Object.keys(all).find(t => all[t][hash]);
+  let type = null;
+  for (const t of ["url", "notes"]) {
+    if (all[t]?.[hash]) {
+      type = t;
+      break;
+    }
+  }
   if (!type) {
-    return showConfirm("Entry missing", true);
+    showConfirm("Reminder not found", true);
+    return;
   }
   chrome.runtime.sendMessage(
     { action: "deleteReminder", hash, type },
-    res => {
-      if (res.status === "success") {
-        showConfirm("Deleted!");
+    r => {
+      if (r.status === "success") {
+        showConfirm("Reminder deleted!");
         loadReminders();
       } else {
-        showConfirm(res.message || "Delete failed", true);
+        showConfirm(r.message, true);
       }
     }
   );
@@ -279,34 +319,38 @@ btnNukeAll.addEventListener("click", () => {
   nukeModal.style.display = "block";
 });
 btnNo.addEventListener("click", () => {
-  nukeModal.style.display = "none";
   blurContainer.classList.remove("blur-active");
+  nukeModal.style.display = "none";
 });
 btnYes.addEventListener("click", () => {
-  chrome.runtime.sendMessage({ action: "nukeAllReminders" }, res => {
-    if (res.status === "success") {
-      showConfirm("All reminders gone.");
+  chrome.runtime.sendMessage({ action: "nukeAllReminders" }, r => {
+    if (r.status === "success") {
+      showConfirm("All reminders deleted!");
       loadReminders();
     } else {
-      showConfirm(res.message || "Nuke failed", true);
+      showConfirm(r.message, true);
     }
-    nukeModal.style.display = "none";
     blurContainer.classList.remove("blur-active");
+    nukeModal.style.display = "none";
   });
 });
 
 document.querySelectorAll(".main-tab-header").forEach(h => {
   h.onclick = () => {
-    const mainTab = h.dataset.tab;
-    const defaultSub = mainTab === "url" ? "futureUrl" : "futureNote";
-    activateTab(mainTab, defaultSub);
+    const tab = h.dataset.tab;
+    activateTab(tab);
   };
 });
 document.querySelectorAll(".sub-tab-header").forEach(h => {
-  h.onclick = () => {
-    const mainTab = h.closest(".url-sub-tabs") ? "url" : "notes";
-    activateTab(mainTab, h.dataset.tab);
+  h.onclick = async () => {
+    const subTab = h.dataset.tab;
+    const states = await getSectionStates();
+    activateTab(states.activeTab, subTab);
   };
 });
 
-document.addEventListener("DOMContentLoaded", loadReminders);
+document.addEventListener("DOMContentLoaded", async () => {
+  const states = await getSectionStates();
+  activateTab(states.activeTab, states.subTab);
+  loadReminders();
+});
